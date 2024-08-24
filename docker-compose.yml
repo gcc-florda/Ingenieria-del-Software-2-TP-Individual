@@ -8,4 +8,7 @@ services:
       HOST: ${HOST}
       PORT: ${PORT}
     volumes:
-      - ./app:/app
+      - snpmsg-node-modules:/app/node_modules
+
+volumes:
+  snpmsg-node-modules:
