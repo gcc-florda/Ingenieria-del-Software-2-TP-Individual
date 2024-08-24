@@ -1,0 +1,11 @@
+services:
+  node:
+    build: ./app
+    ports:
+      - "${PORT}:${PORT}"
+    environment:
+      NODE_ENV: ${ENVIRONMENT}
+      HOST: ${HOST}
+      PORT: ${PORT}
+    volumes:
+      - ./app:/app
