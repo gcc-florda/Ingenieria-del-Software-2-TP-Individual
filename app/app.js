@@ -11,13 +11,19 @@ app.use(express.json());
 
 let snapMsgs = [];
 
-// Post a message to the SnapMsgs app
-app.post("/snapmsg", (req, res) => {
+app.post("/snaps", (req, res) => {
   const { message } = req.body;
 
   if (!message || typeof message != "string") {
     return res.status(400).json({
-      error: "You must provide a valid message.",
+      type: "about:blank",
+      title: "Your request parameters didn't validate.",
+      "invalid-params": [
+        {
+          name: "message",
+          reason: "message is required and must be a string",
+        },
+      ],
     });
   }
 
@@ -28,12 +34,24 @@ app.post("/snapmsg", (req, res) => {
   };
 
   snapMsgs.push(newSnapMsg);
-  res.status(201).json(newSnapMsg);
+  res.status(201).json({
+    title: "Snap created successfully",
+    data: newSnapMsg,
+  });
 });
 
-// Get all SnapMsgs
-app.get("/snapmsgs", (req, res) => {
-  res.json(snapMsgs.reverse());
+app.get("/snaps", (req, res) => {
+  try {
+    res.status(200).json({
+      title: "A list of snaps",
+      data: snapMsgs.reverse(),
+    });
+  } catch (error) {
+    res.status(500).json({
+      title: "Internal server error",
+      detail: error.message,
+    });
+  }
 });
 
 app.get("/ping", (req, res) => {
