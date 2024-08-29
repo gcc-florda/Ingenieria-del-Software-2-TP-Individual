@@ -7,8 +7,26 @@ services:
       NODE_ENV: ${ENVIRONMENT}
       HOST: ${HOST}
       PORT: ${PORT}
+      DB_HOST: ${DATABASE_HOST}
+      DB_USER: ${DATABASE_USER}
+      DB_PASSWORD: ${DATABASE_PASSWORD}
+      DB_NAME: ${DATABASE_NAME}
     volumes:
       - snpmsg-node-modules:/app/node_modules
+    depends_on:
+      - postgres
+
+  postgres:
+    image: postgres:13
+    environment:
+      POSTGRES_USER: ${DATABASE_USER}
+      POSTGRES_PASSWORD: ${DATABASE_PASSWORD}
+      POSTGRES_DB: ${DATABASE_NAME}
+    ports:
+      - "${DATABASE_PORT}:${DATABASE_PORT}"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
 
 volumes:
   snpmsg-node-modules:
+  postgres-data:

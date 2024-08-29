@@ -2,6 +2,7 @@ const express = require("express");
 const dotenv = require("dotenv");
 const { v4: uuidv4 } = require("uuid");
 const winston = require("winston");
+const { Pool } = require("pg");
 
 dotenv.config();
 
@@ -26,9 +27,29 @@ const logger = winston.createLogger({
 
 app.use(express.json());
 
-let snapMsgs = [];
+const pool = new Pool({
+  host: "postgres",
+  user: "root",
+  port: 5432,
+  password: "1234",
+  database: "snapdb",
+});
 
-app.post("/snaps", (req, res) => {
+async function initializeDatabase() {
+  const client = await pool.connect();
+
+  await client.query(`
+    CREATE TABLE IF NOT EXISTS snap_msgs (
+      id UUID PRIMARY KEY,
+      message TEXT NOT NULL,
+      createdAt TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    )
+  `);
+
+  client.release();
+}
+
+app.post("/snaps", async (req, res) => {
   const { message } = req.body;
 
   if (!message || typeof message !== "string") {
@@ -51,20 +72,40 @@ app.post("/snaps", (req, res) => {
     createdAt: new Date(),
   };
 
-  snapMsgs.push(newSnapMsg);
-  logger.info("Snap created successfully", { id: newSnapMsg.id });
-  res.status(201).json({
-    title: "Snap created successfully",
-    data: newSnapMsg,
-  });
+  try {
+    const client = await pool.connect();
+    await client.query(
+      "INSERT INTO snap_msgs (id, message, createdAt) VALUES ($1, $2, $3)",
+      [newSnapMsg.id, newSnapMsg.message, newSnapMsg.createdAt]
+    );
+    client.release();
+
+    logger.info("Snap created successfully", { id: newSnapMsg.id });
+    res.status(201).json({
+      title: "Snap created successfully",
+      data: newSnapMsg,
+    });
+  } catch (error) {
+    logger.error("Error creating snap", { message: error.message });
+    res.status(500).json({
+      title: "Internal server error",
+      detail: error.message,
+    });
+  }
 });
 
-app.get("/snaps", (req, res) => {
+app.get("/snaps", async (req, res) => {
   try {
+    const client = await pool.connect();
+    const result = await client.query(
+      "SELECT * FROM snap_msgs ORDER BY createdAt DESC"
+    );
+    client.release();
+
     logger.info("Retrieved all snaps");
     res.status(200).json({
       title: "A list of snaps",
-      data: snapMsgs.reverse(),
+      data: result.rows,
     });
   } catch (error) {
     logger.error("Error retrieving snaps", { message: error.message });
@@ -80,18 +121,20 @@ app.get("/ping", (req, res) => {
   res.send("ping!");
 });
 
-// Start server
-const server = app.listen(port, () => {
-  logger.info(`App listening on port ${port}`);
-});
+initializeDatabase().then(() => {
+  // Start server
+  const server = app.listen(port, () => {
+    logger.info(`App listening on port ${port}`);
+  });
 
-// Signal management
-process.on("SIGTERM", async () => {
-  logger.info("SIGTERM signal received.");
-  server.close();
-});
+  // Signal management
+  process.on("SIGTERM", async () => {
+    logger.info("SIGTERM signal received.");
+    server.close();
+  });
 
-process.on("SIGINT", async () => {
-  logger.info("SIGINT signal received.");
-  server.close();
+  process.on("SIGINT", async () => {
+    logger.info("SIGINT signal received.");
+    server.close();
+  });
 });
