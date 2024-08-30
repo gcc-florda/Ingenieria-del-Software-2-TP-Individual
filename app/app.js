@@ -2,7 +2,6 @@ const express = require("express");
 const dotenv = require("dotenv");
 const { v4: uuidv4 } = require("uuid");
 const winston = require("winston");
-const { Pool } = require("pg");
 
 dotenv.config();
 
@@ -27,29 +26,9 @@ const logger = winston.createLogger({
 
 app.use(express.json());
 
-const pool = new Pool({
-  host: "postgres",
-  user: "root",
-  port: 5432,
-  password: "1234",
-  database: "snapdb",
-});
+const snapMsgs = [];
 
-async function initializeDatabase() {
-  const client = await pool.connect();
-
-  await client.query(`
-    CREATE TABLE IF NOT EXISTS snap_msgs (
-      id UUID PRIMARY KEY,
-      message TEXT NOT NULL,
-      createdAt TIMESTAMPTZ NOT NULL DEFAULT NOW()
-    )
-  `);
-
-  client.release();
-}
-
-app.post("/snaps", async (req, res) => {
+app.post("/snaps", (req, res) => {
   const { message } = req.body;
 
   if (!message || typeof message !== "string") {
@@ -73,12 +52,7 @@ app.post("/snaps", async (req, res) => {
   };
 
   try {
-    const client = await pool.connect();
-    await client.query(
-      "INSERT INTO snap_msgs (id, message, createdAt) VALUES ($1, $2, $3)",
-      [newSnapMsg.id, newSnapMsg.message, newSnapMsg.createdAt]
-    );
-    client.release();
+    snapMsgs.push(newSnapMsg);
 
     logger.info("Snap created successfully", { id: newSnapMsg.id });
     res.status(201).json({
@@ -94,18 +68,12 @@ app.post("/snaps", async (req, res) => {
   }
 });
 
-app.get("/snaps", async (req, res) => {
+app.get("/snaps", (req, res) => {
   try {
-    const client = await pool.connect();
-    const result = await client.query(
-      "SELECT * FROM snap_msgs ORDER BY createdAt DESC"
-    );
-    client.release();
-
     logger.info("Retrieved all snaps");
     res.status(200).json({
       title: "A list of snaps",
-      data: result.rows,
+      data: snapMsgs.reverse(),
     });
   } catch (error) {
     logger.error("Error retrieving snaps", { message: error.message });
@@ -121,20 +89,20 @@ app.get("/ping", (req, res) => {
   res.send("ping!");
 });
 
-initializeDatabase().then(() => {
-  // Start server
-  const server = app.listen(port, () => {
-    logger.info(`App listening on port ${port}`);
-  });
-
-  // Signal management
-  process.on("SIGTERM", async () => {
-    logger.info("SIGTERM signal received.");
-    server.close();
-  });
-
-  process.on("SIGINT", async () => {
-    logger.info("SIGINT signal received.");
-    server.close();
-  });
+// Start server
+const server = app.listen(port, () => {
+  logger.info(`App listening on port ${port}`);
 });
+
+// Signal management
+process.on("SIGTERM", async () => {
+  logger.info("SIGTERM signal received.");
+  server.close();
+});
+
+process.on("SIGINT", async () => {
+  logger.info("SIGINT signal received.");
+  server.close();
+});
+
+module.exports = app;
