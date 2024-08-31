@@ -4,7 +4,7 @@ module.exports = (logger) => {
   const createSnap = async (req, res) => {
     const { message } = req.body;
 
-    if (!message || typeof message != "string") {
+    if (!message || typeof message != "string" || message.length > 280) {
       logger.warn("Bad request: invalid message parameter");
       return res.status(400).json({
         type: "about:blank",

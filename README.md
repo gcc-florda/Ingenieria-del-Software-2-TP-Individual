@@ -5,9 +5,10 @@
 1. [Introducción](#introducción)
 2. [Desafíos del Proyecto](#desafíos-del-proyecto)
 3. [Estructura del Proyecto](#estructura-del-proyecto)
-4. [Pre-requisitos](#pre-requisitos)
-5. [Guía de Usuario para Testing](#guía-de-usuario-para-testing)
-6. [Comandos](#comandos)
+4. [Endpoints](#endpoints)
+5. [Pre-requisitos](#pre-requisitos)
+6. [Testing](#testing)
+7. [Comandos](#comandos)
 
 ## Introducción
 
@@ -28,6 +29,16 @@ El proyecto está organizado de la siguiente manera:
 - **`controllers/snapController.js`**: Procesa mensajes los cuales envia al servicio y devuelve errores.
 - **`services/snapService.js`**: Contiene la lógica de negocio y funciones que interactúan con la base de datos para insertar y seleccionar mensajes Snap.
 - **`database/index.js`**: Configura y gestiona las conexiones a la base de datos PostgreSQL, y contiene funciones para inicializar la base de datos y realizar consultas.
+
+## Endpoints
+
+### POST /snaps
+
+Permite al usuario crear y publicar mensajes cortos (280 caracteres) en su feed.
+
+### GET /snaps
+
+Permite al usuario ver todos sus mensajes publicados.
 
 ## Pre-requisitos
 
