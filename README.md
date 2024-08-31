@@ -9,6 +9,7 @@
 5. [Pre-requisitos](#pre-requisitos)
 6. [Testing](#testing)
 7. [Comandos](#comandos)
+8. [Probar los Endpoints](#probar-los-endpoints)
 
 ## Introducción
 
@@ -93,4 +94,20 @@ docker-compose run --rm node npm test
 docker-compose build
 
 docker-compose up
+```
+
+## Probar los Endpoints
+
+### POST /snaps
+
+```bash
+curl -X POST http://localhost:8080/snaps \
+  -H "Content-Type: application/json" \
+  -d '{"message": "Message 1"}'
+```
+
+### GET /snaps
+
+```bash
+curl http://localhost:8080/snaps
 ```
