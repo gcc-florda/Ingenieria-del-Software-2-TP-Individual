@@ -15,10 +15,29 @@ describe("POST /snaps", () => {
     expect(response.body.data).toHaveProperty("createdAt");
   });
 
-  it("Should return 400 if message does not exists", async () => {
+  it("Should return 400 if message does not exist", async () => {
     const response = await request(app)
       .post("/snaps")
       .send({})
+      .expect("Content-Type", /json/)
+      .expect(400);
+
+    expect(response.body).toHaveProperty("type", "about:blank");
+    expect(response.body).toHaveProperty(
+      "title",
+      "Your request parameters didn't validate."
+    );
+    expect(response.body["invalid-params"][0]).toHaveProperty(
+      "name",
+      "message"
+    );
+  });
+
+  it("Should return 400 if message exceeds 280 characters", async () => {
+    const longMessage = "x".repeat(281);
+    const response = await request(app)
+      .post("/snaps")
+      .send({ message: longMessage })
       .expect("Content-Type", /json/)
       .expect(400);
 
