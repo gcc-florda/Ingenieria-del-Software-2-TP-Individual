@@ -82,7 +82,7 @@ cd app
 #### Ejecutar los tests con el siguiente comando
 
 ```bash
-npm test
+docker-compose run --rm node npm test
 ```
 
 ## Comandos
