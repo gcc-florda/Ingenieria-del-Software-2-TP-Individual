@@ -6,7 +6,7 @@ const controller = require("./controllers/snapController");
 dotenv.config();
 
 const app = express();
-const port = process.env.PORT || 8080;
+const port = process.env.PORT || 8081;
 
 const logger = winston.createLogger({
   level: "info",
