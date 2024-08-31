@@ -96,3 +96,19 @@ docker-compose build
 
 docker-compose up
 ```
+
+## Probar los Endpoints
+
+### POST /snaps
+
+```bash
+curl -X POST http://localhost:8080/snaps \
+  -H "Content-Type: application/json" \
+  -d '{"message": "Message 1"}'
+```
+
+### GET /snaps
+
+```bash
+curl http://localhost:8080/snaps
+```
