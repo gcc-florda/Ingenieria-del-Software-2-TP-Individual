@@ -71,6 +71,10 @@ Este proyecto utiliza [Supertest](https://github.com/visionmedia/supertest) y [J
 
 Para correr los tests de integracion seguir los siguientes pasos:
 
+#### Aclaracion
+
+No hay que tener el contenedor de docker corriendo para que no haya problema con el port de la app.
+
 #### Moverse a la branch `tests` y entrar en la carpeta `app`
 
 ```bash
