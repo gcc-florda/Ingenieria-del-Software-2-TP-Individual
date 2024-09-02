@@ -8,7 +8,31 @@ const pool = new Pool({
   database: "snapdb",
 });
 
+const connectToDatabase = async (retries = 3, delay = 5000) => {
+  return new Promise((resolve, reject) => {
+    let attempt = 0;
+
+    const connect = async () => {
+      try {
+        const client = await pool.connect();
+        client.release();
+        resolve();
+      } catch (error) {
+        if (attempt < retries) {
+          attempt++;
+          setTimeout(connect, delay);
+        } else {
+          reject(new Error("Database is not ready"));
+        }
+      }
+    };
+
+    connect();
+  });
+};
+
 const initialize = async () => {
+  await connectToDatabase();
   const client = await pool.connect();
   try {
     await client.query(`
