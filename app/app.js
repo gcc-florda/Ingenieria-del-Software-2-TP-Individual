@@ -31,6 +31,22 @@ const snapController = controller(logger);
 app.post("/snaps", snapController.createSnap);
 app.get("/snaps", snapController.getAllSnaps);
 
+app.use((err, req, res, next) => {
+  if (err instanceof SyntaxError && err.status == 400 && "body" in err) {
+    logger.warn("Bad request: invalid message parameter");
+    return res.status(400).json({
+      type: "about:blank",
+      title: "Your request parameters didn't validate.",
+      "invalid-params": [
+        {
+          name: "message",
+          reason: "Bad JSON format",
+        },
+      ],
+    });
+  }
+});
+
 database.initialize().then(() => {
   const server = app.listen(port, () => {
     logger.info(`App listening on port ${port}`);
