@@ -22,14 +22,14 @@ module.exports = (logger) => {
       const newSnapMsg = await snapService.createSnap(message);
       logger.info("Snap created successfully", { id: newSnapMsg.id });
       res.status(201).json({
-        title: "Snap created successfully",
-        data: newSnapMsg,
+        description: "Snap created successfully",
+        content: newSnapMsg,
       });
     } catch (error) {
       logger.error("Error creating snap", { message: error.message });
       res.status(500).json({
         title: "Internal server error",
-        detail: error.message,
+        content: error.message,
       });
     }
   };
@@ -37,16 +37,16 @@ module.exports = (logger) => {
   const getAllSnaps = async (req, res) => {
     try {
       const snaps = await snapService.getAllSnaps();
-      logger.info("Retrieved all snaps");
+      logger.info("Retrieve all snaps");
       res.status(200).json({
-        title: "A list of snaps",
-        data: snaps,
+        description: "A list of snaps",
+        content: snaps,
       });
     } catch (error) {
       logger.error("Error retrieving snaps", { message: error.message });
       res.status(500).json({
-        title: "Internal server error",
-        detail: error.message,
+        description: "Internal server error",
+        content: error.message,
       });
     }
   };
