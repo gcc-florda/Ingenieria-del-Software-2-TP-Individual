@@ -7,7 +7,7 @@ const createSnap = async (message) => {
 
   try {
     await db.insertSnapMsg(id, message, createdAt);
-    return { id, message, createdAt };
+    return { id, message };
   } catch (error) {
     throw error;
   }

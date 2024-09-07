@@ -63,7 +63,7 @@ const selectAllSnaps = async () => {
   const client = await pool.connect();
   try {
     return await client.query(
-      "SELECT * FROM snap_msgs ORDER BY createdAt DESC"
+      "SELECT id, message FROM snap_msgs ORDER BY createdAt DESC"
     );
   } finally {
     client.release();

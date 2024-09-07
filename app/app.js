@@ -3,6 +3,7 @@ const dotenv = require("dotenv");
 const winston = require("winston");
 const controller = require("./controllers/snapController");
 const database = require("./database");
+const { validateSnapInput } = require("./middleware/snapMiddleware");
 
 dotenv.config();
 
@@ -28,7 +29,7 @@ const logger = winston.createLogger({
 app.use(express.json());
 
 const snapController = controller(logger);
-app.post("/snaps", snapController.createSnap);
+app.post("/snaps", validateSnapInput, snapController.createSnap);
 app.get("/snaps", snapController.getAllSnaps);
 
 app.use((err, req, res, next) => {
@@ -37,12 +38,9 @@ app.use((err, req, res, next) => {
     return res.status(400).json({
       type: "about:blank",
       title: "Your request parameters didn't validate.",
-      "invalid-params": [
-        {
-          name: "message",
-          reason: "Bad JSON format",
-        },
-      ],
+      status: 400,
+      detail: "invalid json format",
+      instance: "/snaps",
     });
   }
 });
