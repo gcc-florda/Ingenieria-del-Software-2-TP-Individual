@@ -2,6 +2,7 @@ const express = require("express");
 const dotenv = require("dotenv");
 const winston = require("winston");
 const controller = require("./controllers/snapController");
+const { validateSnapInput } = require("./middleware/snapMiddleware");
 
 dotenv.config();
 
@@ -27,7 +28,7 @@ const logger = winston.createLogger({
 app.use(express.json());
 
 const snapController = controller(logger);
-app.post("/snaps", snapController.createSnap);
+app.post("/snaps", validateSnapInput, snapController.createSnap);
 app.get("/snaps", snapController.getAllSnaps);
 
 // Start server
